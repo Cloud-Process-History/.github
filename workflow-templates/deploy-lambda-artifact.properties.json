@@ -1,5 +1,5 @@
 {
-    "name": "Build Python Package - Knolar",
-    "description": "A job to Build and Upload a Python Artifact",
+    "name": "Deploy a Lambda - Knolar",
+    "description": "Deploy a Lambda Stack with a previous packaged",
     "iconName": "rocket"
 }
