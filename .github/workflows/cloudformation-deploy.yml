@@ -1,0 +1,40 @@
+name: Deploy Cloudformation-Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      accountNumber:
+        description: 'AWS Account where you want to deploy'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Cloud-Process-History/github-action-assume-role@1.0.0
+        with:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'eu-west-1'
+          AWS_EXTERNAL_ID: ${{ secrets.DEPLOYMENT_EXID }}
+          AWS_ROLE_TO_ASSUME: arn:aws:iam::${{ github.event.inputs.accountNumber }}:role/github-robot-access-role
+          AWS_SESSION_NAME: 'github-robot'
+
+      - name: Get Parameters
+        run: |
+          MyParameter=$(aws cloudformation describe-stacks \
+                      --stack-name=<your-cloudformation-stack-name> \
+                      --query="Stacks[0].Outputs[?OutputKey=='<MyOutputName>'].OutputValue" \
+                      --output text)
+          echo "MyParameter=${MyParameter}" >> $GITHUB_ENV
+
+      - name: Deploy CloudFormation Stack
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+        with:
+          name: <your-stack-name>
+          template: iac/template.yml
+          no-fail-on-empty-changeset: 1
+          parameter-overrides: >-
+            MyParameter=${{ env.MyParameter }},
+            MyParameter2=example
