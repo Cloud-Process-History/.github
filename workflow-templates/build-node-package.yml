@@ -6,7 +6,6 @@ jobs:
   build-and-deploy:
     name: Build, Test, and Deploy Npm Package
     runs-on: ubuntu-latest
-    environment: production
     steps:
     - uses: actions/checkout@v2
     
