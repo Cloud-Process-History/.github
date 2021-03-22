@@ -40,5 +40,5 @@ jobs:
 
     - name: npm publish
       run: |
-        npm run publish --if-present
+        npm publish
 
