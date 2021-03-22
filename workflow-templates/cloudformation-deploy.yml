@@ -23,6 +23,7 @@ jobs:
 
       - name: Get Parameters
         run: |
+        
           MyParameter=$(aws cloudformation describe-stacks \
                       --stack-name=<your-cloudformation-stack-name> \
                       --query="Stacks[0].Outputs[?OutputKey=='<MyOutputName>'].OutputValue" \

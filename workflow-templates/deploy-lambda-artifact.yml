@@ -41,6 +41,7 @@ jobs:
                       --stack-name=<your-cloudformation-stack-name> \
                       --query="Stacks[0].Outputs[?OutputKey=='<MyOutputName>'].OutputValue" \
                       --output text)
+          
           echo "MyParameter=${MyParameter}" >> $GITHUB_ENV
 
       - name: Create Cloudformation Package
