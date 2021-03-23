@@ -1,11 +1,15 @@
-env:
-  ARTIFACTORY_REPOSITORY: 'knolar-npm'
-  NODE_VERSION: '12.x'
+name: Build SPA
+
+on:
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     name: Build, Test, and Deploy Npm Package
     runs-on: ubuntu-latest
+    env:
+      ARTIFACTORY_REPOSITORY: 'knolar-npm'
+      NODE_VERSION: '12.x'
     steps:
     - uses: actions/checkout@v2
     
@@ -13,12 +17,11 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ env.NODE_VERSION }}
-
-    - name: npm set virtual repository
-      run: |
-        npm config set //cepsa.jfrog.io/artifactory/api/npm/${{ env.ARTIFACTORY_REPOSITORY }}/:_authToken ${{ secrets.ARTIFACTORY_TOKEN }}
+        registry-url: http://cepsa.jfrog.io/artifactory/api/npm/${{ env.ARTIFACTORY_REPOSITORY }}
 
     - name: npm install
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
       run: |
         npm install --production
 
@@ -38,6 +41,7 @@ jobs:
         password: ${{ secrets.SONAR_PWD }}   
 
     - name: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
       run: |
-        npm publish
-
+        npm publish --if-present
