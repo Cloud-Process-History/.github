@@ -1,0 +1,54 @@
+name: Deploy SPA
+
+on:
+  workflow_dispatch:
+    inputs:
+      accountNumber:
+        description: 'AWS Account where you want to deploy'
+        required: true
+        default: 644143921600
+      artifact_version:
+        description: 'Package version'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      artifact_package_name: knolar-admin-portal
+      ARTIFACTORY_REPOSITORY: knolar-generic
+    steps:
+     
+      - name: Download Package
+        run: |
+          curl -L -u ${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }} \
+               -X GET "https://cepsa.jfrog.io/artifactory/${{ env.ARTIFACTORY_REPOSITORY }}/${{ env.artifact_package_name }}-${{ github.event.inputs.artifact_version }}.zip" \
+               --output ${{ env.artifact_package_name }}-${{ github.event.inputs.artifact_version }}.zip
+          mkdir dist
+          unzip ${{ env.artifact_package_name }}-${{ github.event.inputs.artifact_version }}.zip -d dist
+
+      - uses: Cloud-Process-History/github-action-assume-role@1.0.0
+        with:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'eu-west-1'
+          AWS_EXTERNAL_ID: ${{ secrets.DEPLOYMENT_EXID }}
+          AWS_ROLE_TO_ASSUME: arn:aws:iam::${{ github.event.inputs.accountNumber }}:role/github-robot-access-role
+          AWS_SESSION_NAME: 'github-robot'
+
+      - name: Upload SPA
+        run: |
+          CloudFrontDistributionBucket=$(aws cloudformation describe-stacks \
+                      --stack-name=admin-portal-${{ github.event.inputs.env }} \
+                      --query="Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionBucket'].OutputValue" \
+                      --output text)
+
+          aws s3 sync dist/ s3://${CloudFrontDistributionBucket} --delete
+
+      - name: Invalidate Distribution
+        run: |
+          CloudFrontDistributionId=$(aws cloudformation describe-stacks \
+                      --stack-name=admin-portal-${{ github.event.inputs.env }} \
+                      --query="Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" \
+                      --output text)
+          aws cloudfront create-invalidation --distribution-id ${CloudFrontDistributionId} --paths "/*"

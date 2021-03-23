@@ -1,0 +1,5 @@
+{
+    "name": "Build Generic Package - Knolar",
+    "description": "A job to Test, Build and Upload a Generic Artifact",
+    "iconName": "upload_package"
+}
