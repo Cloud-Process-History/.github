@@ -1,0 +1,60 @@
+name: Build NodeJs Artifact
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build, Test, and Deploy Npm Package
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACTORY_REPOSITORY: 'knolar-npm'
+      GENERIC_REPOSITORY: 'knolar-generic'
+      NODE_VERSION: '12.x'
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        registry-url: http://cepsa.jfrog.io/artifactory/api/npm/${{ env.ARTIFACTORY_REPOSITORY }}
+
+    - name: npm install
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
+      run: |
+        npm install --production
+
+    - name: npm build
+      run: |
+        npm run build --if-present
+
+    - name: npm test
+      run: |
+        npm run test --if-present
+
+    - name: SonarQube Scan
+      uses: Cloud-Process-History/devops-sonarqube-scan-action@1.0
+      with:
+        host: ${{ secrets.SONAR_HOST }} 
+        login: ${{ secrets.SONAR_USER }}   
+        password: ${{ secrets.SONAR_PWD }}   
+
+    - name: npm publish
+      run: |
+        # generate zip package
+        PACKAGE_VERSION=$(node -p "require('./package.json').version")
+        PACKAGE_NAME=$(node -p "require('./package.json').name")
+        cd ${GITHUB_WORKSPACE}/public
+        zip -r ${GITHUB_WORKSPACE}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip *
+
+        # calculate checksums
+        sha256=$(openssl dgst -sha256 ${GITHUB_WORKSPACE}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip|sed 's/^SHA256.*= //')
+        sha1=$(openssl dgst -sha1 ${GITHUB_WORKSPACE}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip|sed 's/^SHA.*= //')
+
+        # upload zip
+        curl -u ${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }} \
+             -sS -T ${GITHUB_WORKSPACE}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip \
+             -H "X-Checksum-Sha256:${sha256}" -H "X-Checksum-Sha1:${sha1}" \
+             "https://cepsa.jfrog.io/artifactory/${{ env.GENERIC_REPOSITORY }}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip"
