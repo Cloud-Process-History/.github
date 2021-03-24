@@ -35,7 +35,7 @@ jobs:
         npm run test --if-present
 
     - name: SonarQube Scan
-      uses: Cloud-Process-History/devops-sonarqube-scan-action@1.0
+      uses: Cloud-Process-History/github-action-sonarqube-scan@1.0
       with:
         host: ${{ secrets.SONAR_HOST }} 
         login: ${{ secrets.SONAR_USER }}   
