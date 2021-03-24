@@ -1,5 +1,5 @@
 {
     "name": "Build NodeJs Artifact - Knolar",
     "description": "A job to Test, Build and Upload a NodeJs Artifact",
-    "iconName": "build_package"
+    "iconName": "node"
 }
