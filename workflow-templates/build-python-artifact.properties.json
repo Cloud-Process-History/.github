@@ -1,0 +1,5 @@
+{
+    "name": "Build Python Artifact - Knolar",
+    "description": "A job to Test, Build and Upload a Python Artifact",
+    "iconName": "python"
+}

@@ -1,5 +1,5 @@
 {
     "name": "Deploy SPA - Knolar",
     "description": "A job to Deploy a SPA",
-    "iconName": "rocket"
+    "iconName": "react"
 }

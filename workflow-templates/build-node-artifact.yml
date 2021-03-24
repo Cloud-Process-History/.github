@@ -1,4 +1,4 @@
-name: New NodeJS Package Release
+name: New NodeJS Artifact Release
 
 on:
   workflow_dispatch:
