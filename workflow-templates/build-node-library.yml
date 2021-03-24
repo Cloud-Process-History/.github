@@ -1,11 +1,11 @@
-name: Build SPA
+name: New NodeJS Library Release
 
 on:
   workflow_dispatch:
 
 jobs:
   build-and-deploy:
-    name: Build, Test, and Deploy Npm Package
+    name: Build, Test, and Publish NodeJS Library
     runs-on: ubuntu-latest
     env:
       ARTIFACTORY_REPOSITORY: 'knolar-npm'

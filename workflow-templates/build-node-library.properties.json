@@ -1,0 +1,5 @@
+{
+    "name": "Build NodeJS Library - Knolar",
+    "description": "A job to Test, Build and Publish a Node Artifact",
+    "iconName": "node"
+}
