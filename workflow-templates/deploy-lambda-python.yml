@@ -1,0 +1,69 @@
+name: Deploy Lambda Python
+
+on:
+  workflow_dispatch:
+    inputs:
+      accountNumber:
+        description: 'AWS Account where you want to deploy'
+        required: true
+        default: 644143921600
+      env:
+        description: 'Environment dev or pro'
+        required: true
+        default: dev
+        options: ['dev', 'pro']
+      artifact_version:
+        description: 'Package version'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      artifact_package_name: knolar-admin-portal-apigw-test-service
+      ARTIFACTORY_REPOSITORY: knolar-generic
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+      
+      - uses: Cloud-Process-History/github-action-assume-role@1.0.0
+        with:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'eu-west-1'
+          AWS_EXTERNAL_ID: ${{ secrets.DEPLOYMENT_EXID }}
+          AWS_ROLE_TO_ASSUME: arn:aws:iam::${{ github.event.inputs.accountNumber }}:role/github-robot-access-role
+          AWS_SESSION_NAME: 'github-robot'
+
+      - name: Download Package
+        run: |
+          curl -L -u ${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }} \
+               -X GET "https://cepsa.jfrog.io/artifactory/${{ env.ARTIFACTORY_REPOSITORY }}/${{ env.artifact_package_name }}/${{ env.artifact_package_name }}-${{ github.event.inputs.artifact_version }}.zip" \
+               --output ${{ env.artifact_package_name }}-${{ github.event.inputs.artifact_version }}.zip
+          mkdir dist
+          unzip ${{ env.artifact_package_name }}-${{ github.event.inputs.artifact_version }}.zip -d dist
+
+      - name: Get Parameters
+        run: |
+          RestApiId=$(aws cloudformation describe-stacks \
+                      --stack-name=admin-portal-apigw-${{ github.event.inputs.env }} \
+                      --query="Stacks[0].Outputs[?OutputKey=='ApiId'].OutputValue" \
+                      --output text)
+          echo "RestApiId=${RestApiId}" >> $GITHUB_ENV
+
+      - name: Create Cloudformation Package
+        run: |
+          aws cloudformation package --template ${GITHUB_WORKSPACE}/iac/template.yml --s3-bucket cf-templates-1p7kjont3egxg-eu-west-1 --output-template-file ${GITHUB_WORKSPACE}/iac/packaged-template.yml
+
+      - name: Deploy CloudFormation Stack
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+        with:
+          name: admin-portal-apigw-test-service-${{ github.event.inputs.env }}
+          template: iac/packaged-template.yml
+          no-fail-on-empty-changeset: 1
+          capabilities: CAPABILITY_AUTO_EXPAND,CAPABILITY_NAMED_IAM,CAPABILITY_IAM
+          parameter-overrides: >-
+            RestApiId=${{ env.RestApiId }},
+            FunctionName=admin-portal-test-service-${{ github.event.inputs.env }}

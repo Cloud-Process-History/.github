@@ -1,0 +1,5 @@
+{
+    "name": "Deploy a Lambda Python- Knolar",
+    "description": "Deploy a Lambda Stack using a previous artifact",
+    "iconName": "lambda"
+}
