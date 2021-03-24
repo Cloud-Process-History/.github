@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ARTIFACTORY_PYTHON_REPOSITORY: knolar-python
     steps:
     - uses: actions/checkout@v2
     
@@ -17,13 +19,11 @@ jobs:
     - name: Install dependencies
       run: |
         cd ${GITHUB_WORKSPACE}/src
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
+        pip install setuptools wheel twine tox -i https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/${{ ARTIFACTORY_PYTHON_REPOSITORY }}/simple
     
     - name: Run tests
       run: |
-        python -m pip install --upgrade pip
-        pip install tox && tox
+        tox
     
     - name: SonarQube Scan
       uses: Cloud-Process-History/devops-sonarqube-scan-action@1.0

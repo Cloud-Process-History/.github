@@ -15,17 +15,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      artifact_package_name: knolar-admin-portal
-      ARTIFACTORY_REPOSITORY: knolar-generic
+      ARTIFACTORY_NAME: knolar-admin-portal
+      ARTIFACTORY_GENERIC_REPOSITORY: knolar-generic
     steps:
      
       - name: Download Package
         run: |
           curl -L -u ${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }} \
-               -X GET "https://cepsa.jfrog.io/artifactory/${{ env.ARTIFACTORY_REPOSITORY }}/${{ env.artifact_package_name }}-${{ github.event.inputs.artifact_version }}.zip" \
-               --output ${{ env.artifact_package_name }}-${{ github.event.inputs.artifact_version }}.zip
+               -X GET "https://cepsa.jfrog.io/artifactory/${{ env.ARTIFACTORY_GENERIC_REPOSITORY }}/${{ env.ARTIFACTORY_NAME }}-${{ github.event.inputs.artifact_version }}.zip" \
+               --output ${{ env.ARTIFACTORY_NAME }}-${{ github.event.inputs.artifact_version }}.zip
           mkdir dist
-          unzip ${{ env.artifact_package_name }}-${{ github.event.inputs.artifact_version }}.zip -d dist
+          unzip ${{ env.ARTIFACTORY_NAME }}-${{ github.event.inputs.artifact_version }}.zip -d dist
 
       - uses: Cloud-Process-History/github-action-assume-role@1.0.0
         with:

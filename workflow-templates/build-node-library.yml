@@ -8,7 +8,7 @@ jobs:
     name: Build, Test, and Publish NodeJS Library
     runs-on: ubuntu-latest
     env:
-      ARTIFACTORY_REPOSITORY: 'knolar-npm'
+      ARTIFACTORY_NODE_REPOSITORY: 'knolar-npm'
       NODE_VERSION: '12.x'
     steps:
     - uses: actions/checkout@v2
@@ -17,7 +17,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ env.NODE_VERSION }}
-        registry-url: http://cepsa.jfrog.io/artifactory/api/npm/${{ env.ARTIFACTORY_REPOSITORY }}
+        registry-url: http://cepsa.jfrog.io/artifactory/api/npm/${{ env.ARTIFACTORY_NODE_REPOSITORY }}
 
     - name: npm install
       env:

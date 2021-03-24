@@ -6,12 +6,6 @@ on:
       accountNumber:
         description: 'AWS Account where you want to deploy'
         required: true
-        default: 644143921600
-      env:
-        description: 'Environment dev or pro'
-        required: true
-        default: dev
-        options: ['dev', 'pro']
       artifact_version:
         description: 'Package version'
         required: true
@@ -20,8 +14,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      artifact_package_name: knolar-admin-portal-apigw-test-service
-      ARTIFACTORY_REPOSITORY: knolar-generic
+      ARTIFACT_NAME: knolar-admin-portal-apigw-test-service
+      ARTIFACTORY_GENERIC_REPOSITORY: knolar-generic
     steps:
       - uses: actions/checkout@v2
       
@@ -40,10 +34,10 @@ jobs:
       - name: Download Package
         run: |
           curl -L -u ${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }} \
-               -X GET "https://cepsa.jfrog.io/artifactory/${{ env.ARTIFACTORY_REPOSITORY }}/${{ env.artifact_package_name }}/${{ env.artifact_package_name }}-${{ github.event.inputs.artifact_version }}.zip" \
-               --output ${{ env.artifact_package_name }}-${{ github.event.inputs.artifact_version }}.zip
+               -X GET "https://cepsa.jfrog.io/artifactory/${{ env.ARTIFACTORY_GENERIC_REPOSITORY }}/${{ env.ARTIFACT_NAME }}/${{ env.ARTIFACT_NAME }}-${{ github.event.inputs.artifact_version }}.zip" \
+               --output ${{ env.ARTIFACT_NAME }}-${{ github.event.inputs.artifact_version }}.zip
           mkdir dist
-          unzip ${{ env.artifact_package_name }}-${{ github.event.inputs.artifact_version }}.zip -d dist
+          unzip ${{ env.ARTIFACT_NAME }}-${{ github.event.inputs.artifact_version }}.zip -d dist
 
       - name: Get Parameters
         run: |

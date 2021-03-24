@@ -8,8 +8,8 @@ jobs:
     name: Build, Test, and Publish NodeJS Package
     runs-on: ubuntu-latest
     env:
-      ARTIFACTORY_REPOSITORY: 'knolar-npm'
-      GENERIC_REPOSITORY: 'knolar-generic'
+      ARTIFACTORY_NODE_REPOSITORY: 'knolar-npm'
+      ARTIFACTORY_GENERIC_REPOSITORY: 'knolar-generic'
       NODE_VERSION: '12.x'
     steps:
     - uses: actions/checkout@v2
@@ -18,7 +18,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ env.NODE_VERSION }}
-        registry-url: http://cepsa.jfrog.io/artifactory/api/npm/${{ env.ARTIFACTORY_REPOSITORY }}
+        registry-url: http://cepsa.jfrog.io/artifactory/api/npm/${{ env.ARTIFACTORY_NODE_REPOSITORY }}
 
     - name: Install dependencies
       env:
@@ -44,6 +44,7 @@ jobs:
     - name: Publish Artifact
       run: |
         # generate zip package
+        
         PACKAGE_VERSION=$(node -p "require('./package.json').version")
         PACKAGE_NAME=$(node -p "require('./package.json').name")
         cd ${GITHUB_WORKSPACE}/public
@@ -57,4 +58,4 @@ jobs:
         curl -u ${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }} \
              -sS -T ${GITHUB_WORKSPACE}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip \
              -H "X-Checksum-Sha256:${sha256}" -H "X-Checksum-Sha1:${sha1}" \
-             "https://cepsa.jfrog.io/artifactory/${{ env.GENERIC_REPOSITORY }}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip"
+             "https://cepsa.jfrog.io/artifactory/${{ env.ARTIFACTORY_GENERIC_REPOSITORY }}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip"
