@@ -14,7 +14,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      ARTIFACT_NAME: knolar-admin-portal-apigw-test-service
+      ARTIFACT_NAME: < your-artifact-name >
       ARTIFACTORY_GENERIC_REPOSITORY: knolar-generic
     steps:
       - uses: actions/checkout@v2
