@@ -20,6 +20,7 @@ jobs:
       run: |
         cd ${GITHUB_WORKSPACE}/src
         pip install setuptools wheel twine tox -i https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/${{ ARTIFACTORY_REPOSITORY }}/simple
+        pip install -r ${GITHUB_WORKSPACE}/src/requirements.txt -i https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/${{ env.ARTIFACTORY_PYTHON_REPOSITORY }}/simple
 
     - name: Run tests
       run: |
@@ -35,7 +36,11 @@ jobs:
     - name: Publish
       run: |
 
-        cd ${GITHUB_WORKSPACE}/src
+        mkdir ${GITHUB_WORKSPACE}/dist
+        cp -r ${GITHUB_WORKSPACE}/src/* ${GITHUB_WORKSPACE}/dist
+        cd ${GITHUB_WORKSPACE}/dist
+        
+        pip install -r ${GITHUB_WORKSPACE}/dist/requirements.txt -t ${GITHUB_WORKSPACE}/dist/lambda -i https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/${{ env.ARTIFACTORY_PYTHON_REPOSITORY }}/simple
 
         # generate zip package        
         PACKAGE_VERSION=$(python setup.py --version)
