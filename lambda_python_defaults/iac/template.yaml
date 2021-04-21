@@ -31,7 +31,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Ref pLambdaFunctionName
-      Description: Lambda to launch the billing process
+      Description: Lambda description
       CodeUri: ../dist/lambda_code
       Handler: lambda_code.lambda_handler
       MemorySize: !Ref pMemorySize
