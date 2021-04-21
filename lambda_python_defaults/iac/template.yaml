@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda to trigger Billing task daily.
+
+Parameters:    
+  pLambdaFunctionName:
+    Description: Lambda Function Name
+    Type: String
+
+  pMemorySize:
+    Description: Lamba Memory Capacity
+    Type: String
+
+  pTimeout:
+    Description: Lambda Timeout
+    Type: String
+
+  Subnets:
+      Description: Choose which subnets the service will allow ingress
+      Type: List<AWS::EC2::Subnet::Id>
+
+  SecurityGroup:
+      Description: Lambda SecurityGroup
+      Type: String
+
+  
+
+Resources:
+  # Lambda Function 
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref pLambdaFunctionName
+      Description: Lambda to launch the billing process
+      CodeUri: ../dist/lambda_code
+      Handler: lambda_code.lambda_handler
+      MemorySize: !Ref pMemorySize
+      Role: !GetAtt LambdaFuncExecutionRole.Arn
+      Runtime: python3.7
+      Timeout: !Ref pTimeout
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref SecurityGroup
+        SubnetIds: !Ref Subnets
+      
+
+  # Log group
+  FunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: [ LambdaFunction ]
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${LambdaFunction}
+      RetentionInDays: 7
+
+
+  # Execution Role
+  LambdaFuncExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess
+      
+Outputs:
+  LambdaFunctionArn:
+    Description: A reference to the LambdaFunction
+    Value: !GetAtt LambdaFunction.Arn
+
+  LambdaFunctionArn:
+    Description: Lambda function name
+    Value: !Ref LambdaFunction
