@@ -37,17 +37,16 @@ jobs:
     
     - name: Publish
       run: |
-
         mkdir ${GITHUB_WORKSPACE}/dist
         cp -r ${GITHUB_WORKSPACE}/src/* ${GITHUB_WORKSPACE}/dist
+        pip install -r ${GITHUB_WORKSPACE}/dist/requirements.txt -t ${GITHUB_WORKSPACE}/dist/lambda_code -i https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/${{ env.ARTIFACTORY_PYTHON_REPOSITORY }}/simple
         cd ${GITHUB_WORKSPACE}/dist
-        
-        pip install -r ${GITHUB_WORKSPACE}/dist/requirements.txt -t ${GITHUB_WORKSPACE}/dist/lambda -i https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/${{ env.ARTIFACTORY_PYTHON_REPOSITORY }}/simple
 
         # generate zip package        
         PACKAGE_VERSION=$(python setup.py --version)
         PACKAGE_NAME=$(python setup.py --name)
 
+        cd ${GITHUB_WORKSPACE}/dist/lambda_code
         zip -r ${GITHUB_WORKSPACE}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip *
 
         # calculate checksums
@@ -59,3 +58,4 @@ jobs:
              -sS -T ${GITHUB_WORKSPACE}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip \
              -H "X-Checksum-Sha256:${sha256}" -H "X-Checksum-Sha1:${sha1}" \
              "https://cepsa.jfrog.io/artifactory/${{ env.ARTIFACTORY_GENERIC_REPOSITORY }}/${PACKAGE_NAME}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip"
+        

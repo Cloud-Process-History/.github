@@ -28,7 +28,7 @@ Parameters:
 Resources:
   # Lambda Function 
   LambdaFunction:
-    Type: AWS::Lambda::Function
+    Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Ref pLambdaFunctionName
       Description: Lambda description
