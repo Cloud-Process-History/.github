@@ -2,10 +2,12 @@ name: New Python Artifact Release
 
 on:
   workflow_dispatch:
-  # push:
-  #   # branches:
-  #   #   - 'feature/**'
-  #   #   - 'hotfix/**'´
+  push:
+    branches:
+      - 'feature/**'
+      - 'hotfix/**'´
+    tags:
+      - '*'
 
 jobs:
   build:
