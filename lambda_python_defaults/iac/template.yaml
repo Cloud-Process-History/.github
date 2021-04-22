@@ -23,6 +23,10 @@ Parameters:
       Description: Lambda SecurityGroup
       Type: String
 
+  pDeployVersion:
+      Description: Deployed version
+      Type: String
+
   
 
 Resources:
@@ -42,6 +46,8 @@ Resources:
         SecurityGroupIds:
           - !Ref SecurityGroup
         SubnetIds: !Ref Subnets
+      Tags:
+        Version: !Sub ${pDeployVersion}
       
 
   # Log group

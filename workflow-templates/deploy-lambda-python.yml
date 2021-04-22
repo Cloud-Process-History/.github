@@ -61,3 +61,4 @@ jobs:
           parameter-overrides: >-
             RestApiId=${{ env.RestApiId }},
             FunctionName=admin-portal-test-service-${{ github.event.inputs.env }}
+            pDeployVersion=${{github.event.inputs.artifact_version}}
