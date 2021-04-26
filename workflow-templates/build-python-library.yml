@@ -19,11 +19,15 @@ jobs:
     - name: Install dependencies
       run: |
         cd ${GITHUB_WORKSPACE}/src
-        pip install setuptools wheel twine tox -i https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/${{ ARTIFACTORY_PYTHON_REPOSITORY }}/simple
+        pip install setuptools wheel twine tox pylint -i https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/${{ ARTIFACTORY_PYTHON_REPOSITORY }}/simple
     
     - name: Run tests
       run: |
         tox
+
+    - name: Run pylint
+      run: |
+        pylint src/dax_status -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero > pylint.out
     
     - name: SonarQube Scan
       uses: Cloud-Process-History/github-action-sonarqube-scan@1.0
