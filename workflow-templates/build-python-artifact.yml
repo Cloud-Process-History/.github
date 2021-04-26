@@ -60,7 +60,7 @@ jobs:
         fi
 
         if [[ $GITHUB_REF == *"hotfix/"* ]]; then
-          PACKAGE_VERSION="${PACKAGE_VERSION}-SNAPSHOT-feature-${GITHUB_REF##*/}-${VERSION_DATE}"
+          PACKAGE_VERSION="${PACKAGE_VERSION}-SNAPSHOT-hotfix-${GITHUB_REF##*/}-${VERSION_DATE}"
         fi
         echo "PACKAGE_VERSION=${PACKAGE_VERSION}" >> $GITHUB_ENV
 
