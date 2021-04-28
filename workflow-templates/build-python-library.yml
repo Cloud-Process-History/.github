@@ -23,6 +23,8 @@ jobs:
     
     - name: Run tests
       run: |
+        # Set PIP index variable to get dependencies from artifactory
+        export PIP_INDEX_URL=https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/knolar-python/simple
         tox
     
     - name: SonarQube Scan

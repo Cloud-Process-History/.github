@@ -37,7 +37,7 @@ jobs:
                -X GET "https://cepsa.jfrog.io/artifactory/${{ env.ARTIFACTORY_GENERIC_REPOSITORY }}/${{ env.ARTIFACT_NAME }}/${{ env.ARTIFACT_NAME }}-${{ github.event.inputs.artifact_version }}.zip" \
                --output ${{ env.ARTIFACT_NAME }}-${{ github.event.inputs.artifact_version }}.zip
           mkdir dist
-          unzip ${{ env.ARTIFACT_NAME }}-${{ github.event.inputs.artifact_version }}.zip -d dist
+          unzip ${{ env.ARTIFACT_NAME }}-${{ github.event.inputs.artifact_version }}.zip -d dist/lambda_code
 
       - name: Get Parameters
         run: |
@@ -61,3 +61,4 @@ jobs:
           parameter-overrides: >-
             RestApiId=${{ env.RestApiId }},
             FunctionName=admin-portal-test-service-${{ github.event.inputs.env }}
+            pDeployVersion=${{github.event.inputs.artifact_version}}
