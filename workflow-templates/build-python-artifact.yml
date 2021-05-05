@@ -2,6 +2,12 @@ name: New Python Artifact Release
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - 'feature/**'
+      - 'hotfix/**'´
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -10,7 +16,8 @@ jobs:
       ARTIFACTORY_GENERIC_REPOSITORY: 'knolar-generic'
     steps:
     - uses: actions/checkout@v2
-    
+    - name: Branch name
+      run: echo running on branch ${GITHUB_REF##*/}
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -19,12 +26,19 @@ jobs:
     - name: Install dependencies
       run: |
         cd ${GITHUB_WORKSPACE}/src
-        pip install setuptools wheel twine tox -i https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/${{ ARTIFACTORY_REPOSITORY }}/simple
+        pip install setuptools wheel twine tox pylint -i https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/${{ ARTIFACTORY_REPOSITORY }}/simple
+        pip install -r ${GITHUB_WORKSPACE}/src/requirements.txt -i https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/${{ env.ARTIFACTORY_PYTHON_REPOSITORY }}/simple
 
     - name: Run tests
       run: |
+        # Set PIP index variable to get dependencies from artifactory
+        export PIP_INDEX_URL=https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/knolar-python/simple
         tox
-    
+
+    - name: Run pylint
+      run: |
+        pylint src/dax_status -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --exit-zero > pylint.out
+
     - name: SonarQube Scan
       uses: Cloud-Process-History/github-action-sonarqube-scan@1.0
       with:
@@ -34,13 +48,27 @@ jobs:
     
     - name: Publish
       run: |
-
-        cd ${GITHUB_WORKSPACE}/src
+        mkdir ${GITHUB_WORKSPACE}/dist
+        cp -r ${GITHUB_WORKSPACE}/src/* ${GITHUB_WORKSPACE}/dist
+        pip install -r ${GITHUB_WORKSPACE}/dist/requirements.txt -t ${GITHUB_WORKSPACE}/dist/lambda_code -i https://${{ secrets.ARTIFACTORY_USER }}:${{ secrets.ARTIFACTORY_PWD }}@cepsa.jfrog.io/artifactory/api/pypi/${{ env.ARTIFACTORY_PYTHON_REPOSITORY }}/simple
+        cd ${GITHUB_WORKSPACE}/dist
 
         # generate zip package        
         PACKAGE_VERSION=$(python setup.py --version)
         PACKAGE_NAME=$(python setup.py --name)
 
+        VERSION_DATE=$(date +%FT%T)
+
+        if [[ $GITHUB_REF == *"feature/"* ]]; then
+          PACKAGE_VERSION="${PACKAGE_VERSION}-SNAPSHOT-feature-${GITHUB_REF##*/}-${VERSION_DATE}"
+        fi
+
+        if [[ $GITHUB_REF == *"hotfix/"* ]]; then
+          PACKAGE_VERSION="${PACKAGE_VERSION}-SNAPSHOT-hotfix-${GITHUB_REF##*/}-${VERSION_DATE}"
+        fi
+        echo "PACKAGE_VERSION=${PACKAGE_VERSION}" >> $GITHUB_ENV
+
+        cd ${GITHUB_WORKSPACE}/dist/lambda_code
         zip -r ${GITHUB_WORKSPACE}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip *
 
         # calculate checksums
@@ -52,3 +80,12 @@ jobs:
              -sS -T ${GITHUB_WORKSPACE}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip \
              -H "X-Checksum-Sha256:${sha256}" -H "X-Checksum-Sha1:${sha1}" \
              "https://cepsa.jfrog.io/artifactory/${{ env.ARTIFACTORY_GENERIC_REPOSITORY }}/${PACKAGE_NAME}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip"
+        
+
+        PACKAGE_URL="https://cepsa.jfrog.io/artifactory/${{ env.ARTIFACTORY_GENERIC_REPOSITORY }}/${PACKAGE_NAME}/${PACKAGE_NAME}-${PACKAGE_VERSION}.zip"
+        echo "PACKAGE_URL=${PACKAGE_URL}" >> $GITHUB_ENV
+
+    outputs:
+      random-number: ${{ steps.random-number-generator.outputs.random-id }}
+      package-version: ${{env.PACKAGE_VERSION}}
+      package-url: ${{env.PACKAGE_URL}}
