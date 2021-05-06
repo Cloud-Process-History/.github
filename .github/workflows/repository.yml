@@ -19,18 +19,20 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.ROBOT_TOKEN }}
     steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.inputs.repository_path }}
+          token: ${{ env.GITHUB_TOKEN }}
       - name: Github CLI Login
         run: |
           gh --version
-          gh config set prompt disabled
+          #gh config set prompt disabled
           ##echo ${GITHUB_TOKEN} >> token.txt
           #gh auth login --with-token
-          echo ${{ secrets.ROBOT_TOKEN }} | base64
-          echo ${{ secrets.ROBOT_TOKEN }} | gh auth login --with-token
+          #echo ${{ secrets.ROBOT_TOKEN }} | base64
+          #echo ${{ secrets.ROBOT_TOKEN }} | gh auth login --with-token
 
-      - name: Clone repo
-        run: |
-          gh repo clone repository_path
+     
 
 
     #- uses: actions/first-interaction@v1
