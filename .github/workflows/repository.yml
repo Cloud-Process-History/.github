@@ -21,15 +21,12 @@ jobs:
     steps:
       - name: Github CLI Login
         run: |
-          echo ${{ secrets.GITHUB_TOKEN }}
-          echo ${{ secrets.ROBOT_TOKEN }}
-          env
           gh --version
           gh config set prompt disabled
           ##echo ${GITHUB_TOKEN} >> token.txt
           #gh auth login --with-token
+          echo ${{ secrets.ROBOT_TOKEN }} | base64
           echo ${{ secrets.ROBOT_TOKEN }} | gh auth login --with-token
-
 
       - name: Clone repo
         run: |
