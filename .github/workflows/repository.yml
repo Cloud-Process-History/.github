@@ -20,7 +20,7 @@ jobs:
       - name: Github CLI
         run: |
           gh --version
-          gh auth login --with-token ${ROBOT_TOKEN}
+          gh auth login --with-token < echo ${ROBOT_TOKEN}
 
       - name: Clone repo
         run: |
