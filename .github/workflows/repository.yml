@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Github CLI Login
         run: |
+          echo ${{ secrets.GITHUB_TOKEN }}
+          echo ${{ secrets.ROBOT_TOKEN }}
           env
           gh --version
           gh config set prompt disabled
