@@ -27,7 +27,9 @@ jobs:
           gh --version
           gh config set prompt disabled
           ##echo ${GITHUB_TOKEN} >> token.txt
-          gh auth login --with-token
+          #gh auth login --with-token
+          echo ${{ secrets.ROBOT_TOKEN }} | gh auth login --with-token
+
 
       - name: Clone repo
         run: |
