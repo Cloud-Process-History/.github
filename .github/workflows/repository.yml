@@ -6,6 +6,10 @@ on:
       event_type:
         description: 'Event Type'
         required: true
+        default: created
+      repository_path:
+        required: true
+        default: Cloud-Process-History/test-hook
 
 jobs:
   greeting:
@@ -16,6 +20,12 @@ jobs:
       - name: Github CLI
         run: |
           gh --version
+          gh auth login --with-token ${ROBOT_TOKEN}
+
+      - name: Clone repo
+        run: |
+          gh repo clone repository_path
+
 
     #- uses: actions/first-interaction@v1
     #  with:
