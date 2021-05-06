@@ -16,11 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     #permissions:
     #  issues: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.ROBOT_TOKEN }}
     steps:
       - name: Github CLI
         run: |
           gh --version
-          gh auth login --with-token < echo ${ROBOT_TOKEN}
+          gh auth login --with-token
 
       - name: Clone repo
         run: |
