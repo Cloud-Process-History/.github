@@ -19,7 +19,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.ROBOT_TOKEN }}
     steps:
-      - name: Github CLI
+      - name: Github CLI Login
         run: |
           gh --version
           gh auth login --with-token
