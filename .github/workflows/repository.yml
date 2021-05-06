@@ -22,8 +22,9 @@ jobs:
       - name: Github CLI Login
         run: |
           gh --version
-          echo ${GITHUB_TOKEN} >> token.txt
-          gh auth login --with-token < token.txt
+          gh config set prompt disabled
+          ##echo ${GITHUB_TOKEN} >> token.txt
+          gh auth login --with-token
 
       - name: Clone repo
         run: |
