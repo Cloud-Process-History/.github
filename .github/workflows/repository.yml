@@ -1,0 +1,41 @@
+name: New Repository Created
+
+on:
+  workflow_dispatch:
+    inputs:
+      event_type:
+        description: 'Event Type'
+        required: true
+        default: created
+      repository_path:
+        required: true
+        default: Cloud-Process-History/test-hook
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    #permissions:
+    #  issues: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.ROBOT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.inputs.repository_path }}
+          token: ${{ env.GITHUB_TOKEN }}
+      - name: Github CLI Login
+        run: |
+          gh --version
+          #gh config set prompt disabled
+          ##echo ${GITHUB_TOKEN} >> token.txt
+          #gh auth login --with-token
+          #echo ${{ secrets.ROBOT_TOKEN }} | base64
+          #echo ${{ secrets.ROBOT_TOKEN }} | gh auth login --with-token
+
+     
+
+
+    #- uses: actions/first-interaction@v1
+    #  with:
+    #    repo-token: ${{ secrets.GITHUB_TOKEN }}
+    #    issue-message: 'Message that will be displayed on users first issue'
