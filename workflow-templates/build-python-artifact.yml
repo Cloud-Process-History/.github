@@ -44,7 +44,8 @@ jobs:
       with:
         host: ${{ secrets.SONAR_HOST }} 
         login: ${{ secrets.SONAR_USER }}   
-        password: ${{ secrets.SONAR_PWD }}        
+        password: ${{ secrets.SONAR_PWD }}
+        checkQualityGate: false
     
     - name: Publish
       run: |
