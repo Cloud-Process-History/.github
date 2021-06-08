@@ -36,8 +36,8 @@ Resources:
     Properties:
       FunctionName: !Ref pLambdaFunctionName
       Description: Lambda description
-      CodeUri: ../dist/lambda_code
-      Handler: lambda_code.lambda_handler
+      CodeUri: ../dist
+      Handler: lambda_code.lambda_code.lambda_handler
       MemorySize: !Ref pMemorySize
       Role: !GetAtt LambdaFuncExecutionRole.Arn
       Runtime: python3.7

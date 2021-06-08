@@ -25,12 +25,9 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
-#with open(os.path.join(here, 'README.md')) as f:
-#    README = f.read()
 
 setup(
     name='<YOUR_PACKAGE_NAME>',
-    #long_description=README,
     packages=['lambda_code'],
     version=find_version("lambda_code", "__init__.py"),
     install_requires=requirements,
